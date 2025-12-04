@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import AdminPanel from '@/components/AdminPanel';
 import UserDashboard from '@/components/UserDashboard';
 import HomePage from '@/components/HomePage';
+import AuthDialog from '@/components/AuthDialog';
 
 type Channel = {
   id: string;
@@ -40,10 +41,18 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [isAddChannelOpen, setIsAddChannelOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
-  const handleLogin = () => {
-    setUser({ name: 'Иван Иванов', email: 'ivan@example.com', role: 'user' });
+  const handleLogin = (email: string, password: string) => {
+    setUser({ name: email.split('@')[0], email: email, role: 'user' });
+    setIsAuthDialogOpen(false);
     toast.success('Вы успешно вошли в систему');
+  };
+
+  const handleRegister = (name: string, email: string, password: string) => {
+    setUser({ name: name, email: email, role: 'user' });
+    setIsAuthDialogOpen(false);
+    toast.success('Регистрация прошла успешно!');
   };
 
   const handleAdminLogin = () => {
@@ -54,6 +63,17 @@ export default function Index() {
   const handleLogout = () => {
     setUser(null);
     toast.info('Вы вышли из системы');
+  };
+
+  const handleUpdateProfile = (name: string, email: string) => {
+    if (user) {
+      setUser({ ...user, name, email });
+      toast.success('Профиль обновлен');
+    }
+  };
+
+  const handleChangePassword = (oldPassword: string, newPassword: string) => {
+    toast.success('Пароль успешно изменен');
   };
 
   const handleAddChannel = (e: React.FormEvent<HTMLFormElement>) => {
@@ -84,7 +104,7 @@ export default function Index() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-orange-50">
       <Header 
         user={user}
-        onLogin={handleLogin}
+        onLogin={() => setIsAuthDialogOpen(true)}
         onAdminLogin={handleAdminLogin}
         onLogout={handleLogout}
       />
@@ -94,11 +114,14 @@ export default function Index() {
           <AdminPanel mockChannels={mockChannels} categories={categories} />
         ) : user ? (
           <UserDashboard 
+            user={user}
             myChannels={myChannels}
             categories={categories}
             isAddChannelOpen={isAddChannelOpen}
             setIsAddChannelOpen={setIsAddChannelOpen}
             handleAddChannel={handleAddChannel}
+            onUpdateProfile={handleUpdateProfile}
+            onChangePassword={handleChangePassword}
           />
         ) : (
           <HomePage 
@@ -149,6 +172,13 @@ export default function Index() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AuthDialog 
+        open={isAuthDialogOpen}
+        onOpenChange={setIsAuthDialogOpen}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
     </div>
   );
 }

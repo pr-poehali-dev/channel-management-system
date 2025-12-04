@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ProfileSettings from '@/components/ProfileSettings';
 
 type Channel = {
   id: string;
@@ -22,25 +24,44 @@ type Channel = {
   isTop: boolean;
 };
 
+type User = {
+  name: string;
+  email: string;
+  role: 'user' | 'admin';
+};
+
 type UserDashboardProps = {
+  user: User;
   myChannels: Channel[];
   categories: string[];
   isAddChannelOpen: boolean;
   setIsAddChannelOpen: (open: boolean) => void;
   handleAddChannel: (e: React.FormEvent<HTMLFormElement>) => void;
+  onUpdateProfile: (name: string, email: string) => void;
+  onChangePassword: (oldPassword: string, newPassword: string) => void;
 };
 
 export default function UserDashboard({ 
+  user,
   myChannels, 
   categories, 
   isAddChannelOpen, 
   setIsAddChannelOpen, 
-  handleAddChannel 
+  handleAddChannel,
+  onUpdateProfile,
+  onChangePassword
 }: UserDashboardProps) {
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">Мои каналы</h2>
+      <Tabs defaultValue="channels" className="w-full">
+        <TabsList>
+          <TabsTrigger value="channels">Мои каналы</TabsTrigger>
+          <TabsTrigger value="profile">Профиль</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="channels" className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl font-bold">Мои каналы</h2>
         <Dialog open={isAddChannelOpen} onOpenChange={setIsAddChannelOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
@@ -148,6 +169,16 @@ export default function UserDashboard({
           ))}
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="profile">
+          <ProfileSettings 
+            user={user}
+            onUpdateProfile={onUpdateProfile}
+            onChangePassword={onChangePassword}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
